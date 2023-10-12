@@ -1,0 +1,24 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Backend server repo for Chait App.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Chait-App/backend.git"
+  },
+  "author": "Vythrax",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Chait-App/backend/issues"
+  },
+  "homepage": "https://github.com/Chait-App/backend#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2",
+    "uuid": "^9.0.1"
+  }
+}
