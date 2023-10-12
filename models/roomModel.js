@@ -1,17 +1,24 @@
 const room = {
   roomId: String,
-  isFull: Boolean,
   connectionTime : Date,
-  firstClientId: String,
-  secondClientId: String,
+  firstClientId:"",
+  secondClientId:"",
+  isFull: Boolean,
+  removeClient(clientId) {
+    if(this.firstClientId == clientId) {
+      this.firstClientId = null
+    } else if (this.secondClientId == clientId){
+      this.secondClientId == null
+    }
+  },
   messages : {
-    clientOneMessages: [
+    firstClientMessages: [
       {
         message: String,
         time: Date
       }
     ],
-    clientTwoMessages: [
+    secondClientMessages: [
       {
         message: String,
         time: Date
