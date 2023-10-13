@@ -1,16 +1,10 @@
+const {isKeyFilled} = require("../helpers/helper")
+
 const room = {
   roomId: String,
   connectionTime : Date,
-  firstClientId:"",
-  secondClientId:"",
-  isFull: Boolean,
-  removeClient(clientId) {
-    if(this.firstClientId == clientId) {
-      this.firstClientId = null
-    } else if (this.secondClientId == clientId){
-      this.secondClientId == null
-    }
-  },
+  firstClientId: String,
+  secondClientId: String,
   messages : {
     firstClientMessages: [
       {

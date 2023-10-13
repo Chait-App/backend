@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const uuid = require("uuid");
+const handler = require("./controllers/roomController");
 
 const waitingClients = [];
 const rooms = [];
@@ -17,8 +18,19 @@ app.get('/', (req, res) => {
 });
 
 io.on("connection", (socket) => {
-  console.log("A client has connected.");
-
+  if(handler.checkAvailableRoom(rooms) == -1) {
+    var roomId = handler.generateRoomId(io);
+    var newRoom = handler.assignRoomToClient(roomId, socket.id);
+    rooms.push(newRoom);
+    console.log("A new client has connected and created room for that client.")
+    console.log(rooms)
+  } 
+  else {
+    var roomIndex = handler.checkAvailableRoom(rooms);
+    handler.addClientToRoom(rooms[roomIndex], socket.id)
+    console.log("Another client has connected and assigned to available room.")
+    console.log(rooms);
+  }
 
   socket.on('disconnect', (socket) => {
     console.log('A client has disconnected, Socket ID:', socket.id);
