@@ -16,7 +16,7 @@ const addClientToRoom = function(roomObj,clientId) {
 }
 
 function generateRoomId() {
-  return uuid.v4(); // must be unique across all Socket.IO servers
+  return uuid.v4(); 
 }
 
 const createRoom = (io, socket) => {

@@ -34,8 +34,6 @@ io.on("connection", (socket) => {
     socket.join(roomId)
   }
 
-  socket.to(roomId).emit("message", msg);
-
   socket.on('disconnect', (socket) => {
     console.log('A client has disconnected, Socket ID:', socket.id);
   })
