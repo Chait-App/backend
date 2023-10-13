@@ -1,15 +1,18 @@
 const uuid = require("uuid");
 const {room} = require('../models/roomModel'); 
+const {isKeyFilled} = require('../helpers/helper')
 
 const rooms = []
 
-const addClientToObject = function(roomObj,clientId) {
-    if(!roomObj.firstClientId) {
+const addClientToRoom = function(roomObj,clientId) {
+    if(!isKeyFilled((roomObj.firstClientId))) {
       roomObj.firstClientId = clientId
-    } else if (!roomObj.secondClientId) {
-      roomObj.secondClientId = clientId;
+    } else if(!isKeyFilled(roomObj.secondClientId)) {
+      roomObj.secondClientId = clientId
+    } else {
+      return null
     }
-  return roomObj;
+    return roomObj
 }
 
 function generateRoomId(io) {
@@ -28,14 +31,20 @@ const deleteRoom = (socket, roomId) => {
   
 }
 
-const assignClientToRoom = (roomId, clientId) => {
-  let newRoom = {...room}
-  
-  newRoom = addClientToObject(newRoom,clientId)
+const assignRoomToClient = (roomId, clientId) => {
+  var newRoom = { ...room };
 
-  newRoom.roomId = roomId
+  newRoom.roomId = roomId;
+  newRoom.connectionTime = new Date();
+
+  addClientToRoom(newRoom,clientId);
 
   return newRoom;
+}
+
+const checkAvailableRoom = function(rooms) {
+  var roomIndex = rooms.findIndex((room) => !isRoomFull(room))
+  return roomIndex
 }
 
 const removeClientFromRoom = (roomId, socket, rooms) => {
@@ -53,12 +62,8 @@ const removeClientFromRoom = (roomId, socket, rooms) => {
   return modifiedRoom;
 }
 
-const isRoomEmpty = (roomId) => {
-  return roomId.roomInfo[isFull];
-}
-
-const isRoomFull = (roomId) => {
-  return roomId.roomInfo[isFull];
+const isRoomFull = (room) => {
+  return isKeyFilled(room.firstClientId) && isKeyFilled(room.secondClientId)
 }
 
 const isQueueEmpty = (queueArr) => {
@@ -66,9 +71,13 @@ const isQueueEmpty = (queueArr) => {
 }
 
 module.exports = {
+  generateRoomId,
   createRoom,
   deleteRoom,
-  isRoomEmpty,
+  checkAvailableRoom,
+  assignRoomToClient,
+  addClientToRoom,
+  removeClientFromRoom,
   isRoomFull,
   isQueueEmpty
 }
