@@ -19,18 +19,22 @@ app.get('/', (req, res) => {
 
 io.on("connection", (socket) => {
   if(handler.checkAvailableRoom(rooms) == -1) {
-    var roomId = handler.generateRoomId(io);
+    var roomId = handler.generateRoomId();
     var newRoom = handler.assignRoomToClient(roomId, socket.id);
     rooms.push(newRoom);
     console.log("A new client has connected and created room for that client.")
     console.log(rooms)
+    socket.join(roomId)
   } 
   else {
     var roomIndex = handler.checkAvailableRoom(rooms);
     handler.addClientToRoom(rooms[roomIndex], socket.id)
     console.log("Another client has connected and assigned to available room.")
     console.log(rooms);
+    socket.join(roomId)
   }
+
+  socket.to(roomId).emit("message", msg);
 
   socket.on('disconnect', (socket) => {
     console.log('A client has disconnected, Socket ID:', socket.id);
