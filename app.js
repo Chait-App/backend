@@ -17,6 +17,8 @@ app.get('/', (req, res) => {
   res.send('Server res!');
 });
 
+
+
 io.on("connection", (socket) => {
   if(handler.checkAvailableRoom(rooms) == -1) {
     var roomId = handler.generateRoomId();
@@ -25,6 +27,7 @@ io.on("connection", (socket) => {
     console.log("A new client has connected and created room for that client.")
     console.log(rooms)
     socket.join(roomId)
+    handler.sendRoomId(socket, roomId);
   } 
   else {
     var roomIndex = handler.checkAvailableRoom(rooms);
@@ -32,7 +35,14 @@ io.on("connection", (socket) => {
     console.log("Another client has connected and assigned to available room.")
     console.log(rooms);
     socket.join(roomId)
+    handler.sendRoomId(socket, roomId);
   }
+
+
+  socket.on('roomMessage', ({message}) => {
+    io.to(roomId).emit('roomMessage', {sender: socket.id, message})
+    console.log(`${message} seen on server.`)
+  })
 
   socket.on('disconnect', (socket) => {
     console.log('A client has disconnected, Socket ID:', socket.id);
