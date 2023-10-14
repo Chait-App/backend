@@ -19,6 +19,10 @@ function generateRoomId() {
   return uuid.v4(); 
 }
 
+function sendRoomId(socket,roomId) {
+  socket.emit('roomId', roomId)
+}
+
 const createRoom = (io, socket) => {
   const roomId = generateRoomId(io);
   socket.join(roomId);
@@ -77,5 +81,6 @@ module.exports = {
   addClientToRoom,
   removeClientFromRoom,
   isRoomFull,
-  isQueueEmpty
+  isQueueEmpty,
+  sendRoomId
 }
