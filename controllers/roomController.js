@@ -72,6 +72,27 @@ const isQueueEmpty = (queueArr) => {
   return !(queueArr.length > 0);
 }
 
+const roomAssigner = (socket, rooms) => {
+
+  if(checkAvailableRoom(rooms) == -1) {
+    var roomId = generateRoomId();
+    var newRoom = assignRoomToClient(roomId,socket.id);
+    rooms.push(newRoom);
+    socket.join(roomId);
+    console.log("A new client has connected and created room for that client.")
+    console.log(rooms)
+  }
+  else {
+    var roomIndex = checkAvailableRoom(rooms);
+    addClientToRoom(rooms[roomIndex], socket.id);
+    socket.join(roomId);
+    console.log("Another client has connected and assigned to available room.")
+    console.log(rooms);
+  }
+
+  return rooms.find(room => room.firstClientId == socket.id || room.secondClientId == socket.id).roomId;
+}
+
 module.exports = {
   generateRoomId,
   createRoom,
@@ -82,5 +103,6 @@ module.exports = {
   removeClientFromRoom,
   isRoomFull,
   isQueueEmpty,
+  roomAssigner,
   sendRoomId
 }
