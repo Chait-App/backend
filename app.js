@@ -4,12 +4,20 @@ const socketIo = require('socket.io');
 const uuid = require("uuid");
 const handler = require("./controllers/roomController");
 
+
 const waitingClients = [];
 const rooms = [];
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server);
+const io = socketIo(server, {
+  cors: {
+    origin: ['http://localhost:8081', 'http://192.168.1.15:8081'],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: ['my-custom-header'],
+    credentials: true,
+  }
+});
 
 const PORT = process.env.PORT || 3000;
 
