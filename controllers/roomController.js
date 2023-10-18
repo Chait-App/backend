@@ -49,19 +49,28 @@ const checkAvailableRoom = function(rooms) {
   return roomIndex
 }
 
-const removeClientFromRoom = (roomId, socket, rooms) => {
-  const modifiedRoom = rooms.find((room) => room.roomId === roomId);
-  if (modifiedRoom) {
-    socket.leave(roomId);
-    socket.to(roomId).emit('user left', socket.id);
-
-    if (modifiedRoom.firstClientId === socket.id) {
-      modifiedRoom.firstClientId = null;
-    } else if (modifiedRoom.secondClientId === socket.id) {
-      modifiedRoom.secondClientId = null;
+const removeClientFromRoom = (io, roomId, socketId, rooms) => {
+  const roomIndex = roomIndexFinder(rooms,roomId)
+  const room = rooms[roomIndex];
+  console.log(socketId);
+  if (roomIndex != -1) {
+    io.to(roomId).emit(`User ${socketId} has left the room`);
+    if (room.firstClientId === socketId) {
+      room.firstClientId = undefined;
+    } else if (room.secondClientId === socketId) {
+      room.secondClientId = undefined;
     }
   }
-  return modifiedRoom;
+  return room;
+}
+
+const checkIfRoomValid = (room) => {
+  return !(room.firstClientId == undefined && room.secondClientId == undefined)
+}
+
+
+const roomIndexFinder = (rooms, roomId) => {
+  return rooms.findIndex(room => room.roomId == roomId);
 }
 
 const isRoomFull = (room) => {
@@ -104,5 +113,7 @@ module.exports = {
   isRoomFull,
   isQueueEmpty,
   roomAssigner,
-  sendRoomId
+  sendRoomId,
+  roomIndexFinder,
+  checkIfRoomValid
 }

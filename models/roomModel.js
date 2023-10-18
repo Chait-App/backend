@@ -3,8 +3,8 @@ const {isKeyFilled} = require("../helpers/helper")
 const room = {
   roomId: String,
   connectionTime : Date,
-  firstClientId: String,
-  secondClientId: String,
+  firstClientId: undefined,
+  secondClientId: undefined,
   messages : {
     firstClientMessages: [
       {

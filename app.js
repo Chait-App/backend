@@ -12,7 +12,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: ['http://localhost:8081', 'http://192.168.1.15:8081'],
+    origin: ['http://localhost:8081', 'http://192.168.1.25:8081', 'http://192.168.1.56'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: ['my-custom-header'],
     credentials: true,
@@ -28,20 +28,29 @@ app.get('/', (req, res) => {
 
 
 io.on("connection", (socket) => {
-
+  var socketId = socket.id
   var roomId = handler.roomAssigner(socket, rooms);
+  const roomIndex = handler.roomIndexFinder(rooms,roomId);
 
   handler.sendRoomId(socket, roomId);
 
   io.to(roomId).emit('roomReady');
 
   socket.on('roomMessage', ({message}) => {
-    io.to(roomId).emit('roomMessage', {sender: socket.id, message})
+    io.to(roomId).emit('roomMessage', {sender: socketId, message})
     console.log(`${message} seen on server.`)
   })
 
+
   socket.on('disconnect', (socket) => {
-    console.log('A client has disconnected, Socket ID:', socket.id);
+    var newRoom = handler.removeClientFromRoom(io, roomId, socketId, rooms);
+    if(handler.checkIfRoomValid(newRoom)) {
+      rooms[roomIndex] = newRoom; 
+    } else {
+      rooms.splice(roomIndex,1);
+    }
+    console.log(rooms)
+    console.log('A client has disconnected, Socket ID:', socketId);
   })
 });
 
