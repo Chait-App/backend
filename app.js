@@ -1,18 +1,23 @@
+// app.js
+
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const uuid = require("uuid");
 const handler = require("./controllers/roomController");
+const session = require("express-session")
+const dbController = require("./controllers/dbController");
 
 
-const waitingClients = [];
+process.env.DB
+
 const rooms = [];
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: ['http://localhost:8081', 'http://192.168.1.25:8081', 'http://192.168.1.56'],
+    origin: ['http://localhost:8081', process.env.ALLOWED_IP],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: ['my-custom-header'],
     credentials: true,
@@ -21,39 +26,38 @@ const io = socketIo(server, {
 
 const PORT = process.env.PORT || 3000;
 
-app.get('/', (req, res) => {
-  res.send('Server res!');
-});
-
-
-
-io.on("connection", (socket) => {
-  var socketId = socket.id
+io.on("connection", async (socket) => {
+  
+  var socketId = socket.id;
   var roomId = handler.roomAssigner(socket, rooms);
-  const roomIndex = handler.roomIndexFinder(rooms,roomId);
 
   handler.sendRoomId(socket, roomId);
-
   io.to(roomId).emit('roomReady');
 
-  socket.on('roomMessage', ({message}) => {
-    io.to(roomId).emit('roomMessage', {sender: socketId, message})
-    console.log(`${message} seen on server.`)
-  })
+  socket.on('roomMessage', (message) => {
 
+    dbController.updateMessages(roomId, socketId, message)
+    io.to(roomId).emit('message', { sender: socketId, message: message });
+    //rooms.find(r => r.roomId === roomId).messages.push({ sender: socketId, message: message });
+    console.log(`${message} message sent from ${socketId} in room ${roomId}`);
+  });
 
-  socket.on('disconnect', (socket) => {
+  socket.emit("roomInfo", rooms.find(r => r.roomId === roomId))
+
+  socket.on('disconnect', () => {
     var newRoom = handler.removeClientFromRoom(io, roomId, socketId, rooms);
-    if(handler.checkIfRoomValid(newRoom)) {
-      rooms[roomIndex] = newRoom; 
+    if (handler.checkIfRoomValid(newRoom)) {
+      rooms[rooms.findIndex(r => r.roomId === roomId)] = newRoom;
     } else {
-      rooms.splice(roomIndex,1);
+      rooms.splice(rooms.findIndex(r => r.roomId === roomId), 1);
     }
-    console.log(rooms)
+    console.log(rooms);
     console.log('A client has disconnected, Socket ID:', socketId);
-  })
+  });
 });
+
+
 
 server.listen(3000, () => {
   console.log('Server is listening at localhost:3000');
-})
+});

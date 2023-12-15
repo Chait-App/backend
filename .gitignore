@@ -20,3 +20,6 @@ npm-debug.log
 #Trials
 
 test.js
+
+#
+.env
